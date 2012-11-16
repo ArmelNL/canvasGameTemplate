@@ -63,8 +63,8 @@
   
   Vector2D = Class.extend({
     init : function(x, y){
-      this.x = 0 || x;
-      this.y = 0 || y;
+      this.x = x || 0;
+      this.y = y || 0;
     },
     mulS : function(scalar){ return new Vector2D(this.x * scalar, this.y * scalar);},
     mulV : function(vector){ return new Vector2D(this.x * vector.x, this.y * vector.y);},
