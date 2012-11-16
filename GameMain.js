@@ -39,7 +39,8 @@
 
   loadingPercentage = function(){
     
-    var num = 0;
+    var num = 0,
+        amountResources = Object.keys(resources).length;
     for(var name in resources)
     {
       if(resources[name].ready)
@@ -49,7 +50,7 @@
     }
 
     //return a percentage
-    return num / Object.keys(resources).length * 100;
+    return amountResources === 0 ? 100 : num / amountResources * 100;
 
   },
 
