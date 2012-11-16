@@ -8,7 +8,6 @@
     gameObjects = [],
     loaded = false,
     loadingPanel,
-    sample,
 
   Resource = Class.extend({
     ready: false, //when this changes to true our image is loaded
