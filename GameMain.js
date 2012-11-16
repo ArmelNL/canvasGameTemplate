@@ -87,7 +87,7 @@
     }
   }),
 
-  GameOject = Class.extend({
+  GameObject = Class.extend({
     init: function(x, y){
       this.pos = new Vector2D(x || 0, y || 0);
       this.velocity = new Vector2D(0,0);
@@ -120,7 +120,7 @@
     }
   }),
 
-  TextPanel = GameOject.extend({
+  TextPanel = GameObject.extend({
     init: function(x, y, size, font, fillStyle, text){
       this._super(x || 0, y || 0);
       this.text = text || '';
@@ -162,7 +162,7 @@
     }
   }),
 
-  GameObjectSample_logo = GameOject.extend({
+  GameObjectSample_logo = GameObject.extend({
     init : function(){
       this._super(0,0);
 
