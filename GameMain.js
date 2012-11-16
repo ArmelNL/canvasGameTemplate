@@ -165,19 +165,30 @@
     init : function(){
       this._super(0,0);
 
-      //on init we set the direction to be to the right
-      this.velocity = new Vector2D(1,0);
+      //on init we set the direction
+      this.velocity = new Vector2D(1, 0.5).mulS(4);
 
     },
     update:function(){
       this._super();
 
+      //make sure this object will not fly out of the view
+      this.pos.x = clamp(this.pos.x);
+      this.pos.y = clamp(this.pos.y);
+
       // Bouncing logo
       if(this.pos.x > CANVAS_WIDTH - this.width || this.pos.x < 0)
       {
         //we flip the X axis
-        this.velocity = new Vector2D(-this.velocity.x,0);
+        this.velocity = new Vector2D(-this.velocity.x, this.velocity.y);
       }
+
+      if(this.pos.y > CANVAS_HEIGHT - this.height || this.pos.y < 0)
+      {
+        //we flip the Y axis
+        this.velocity = new Vector2D(this.velocity.x, -this.velocity.y);
+      }
+
     },
     draw: function()
     {
