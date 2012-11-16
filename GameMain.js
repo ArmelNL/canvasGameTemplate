@@ -11,16 +11,24 @@
     sample,
 
   Resource = Class.extend({
-    ready: false,
+    ready: false, //when this changes to true our image is loaded
+    
     init: function(res){
       var that = this;
       this.data = new Image();
+
       this.data.onload = function(){
+        //when our image is loaded we change ready to true
         that.ready = true;
+
+        //we save the width
         that.width = this.width;
+
+        //we save the height
         that.height = this.height;
 
       };
+      //start loading the image
       this.data.src = res;
     }
   }),
@@ -32,18 +40,17 @@
 
   loadingPercentage = function(){
     
-    var num = 0,
-        countObjects = Object.keys(resources).length;
-
+    var num = 0;
     for(var name in resources)
     {
       if(resources[name].ready)
       {
-        num++;
+        num++; //count every resource that is ready
       }
     }
 
-    return num / countObjects * 100;
+    //return a percentage
+    return num / Object.keys(resources).length * 100;
 
   },
 
@@ -56,8 +63,8 @@
   
   Vector2D = Class.extend({
     init : function(x, y){
-      this.x = x;
-      this.y = y;
+      this.x = 0 || x;
+      this.y = 0 || y;
     },
     mulS : function(scalar){ return new Vector2D(this.x * scalar, this.y * scalar);},
     mulV : function(vector){ return new Vector2D(this.x * vector.x, this.y * vector.y);},
@@ -85,20 +92,30 @@
       this.pos = new Vector2D(x || 0, y || 0);
       this.velocity = new Vector2D(0,0);
     },
+
     update : function()
     {
+      //update the position by adding an velocity vector to the position
       this.pos = this.velocity.addV(this.pos);
     },
+
+    //we can use intersect for knowing if a is GameObjects intersects with an object
     interSect : function(obj){
       return (Math.abs(this.pos.x - obj.pos.x) * 2 < (this.width + obj.width)) && (Math.abs(this.pos.y - obj.pos.y) * 2 < (this.height + obj.height));
     },
     draw : function(resource)
     {
-      this.height = this.height || resources[resource].height;
-      this.width = this.width || resources[resource].width;
+      //update the height of the GameObject
+      this.height = resources[resource].height;
+      
+      //update the width of the GameObject
+      this.width = resources[resource].width;
+
+      //draw the resource to the screen on its position
       C.drawImage(resources[resource].data, this.pos.x, this.pos.y);
     },
     remove: function(){
+      //remove this GameObject from the gameObjects array
       gameObjects.splice(gameObjects.indexOf(this), 1);
     }
   }),
@@ -112,14 +129,17 @@
       this.fillStyle = fillStyle || 'black';
 
     },
-    setText : function(text)
-    {
-      this.text = text;
-    },
     draw: function(){
+      //set fillStyle
       C.fillStyle = this.fillStyle;
+
+      //set font size and font style
       C.font = 'bold ' + this.size + 'px ' + this.font;
+
+      //draw the text to the canvas
       C.fillText(this.text, this.pos.x, this.pos.y + this.size/2 + 10);
+      
+      //save the width of the TextPanel
       this.width = C.measureText(this.text).width;
     }
   }),
@@ -127,85 +147,101 @@
   LoadingPanel = TextPanel.extend({
     init: function(){
       this._super();
-      this.text = 'Loading resources: ' + loadingPercentage() + '%';
     },
     update : function()
     {
+      //get the loading percentage
       var percentage = loadingPercentage();
+
+      //set the text of the loading panel
       this.text = 'Loading resources: ' + percentage + '%';
-      if(percentage === 100)
-      {
-        loaded = true;
-      }
+      
+      //set loaded = true; when we hit 100%
+      loaded = (percentage === 100);
+      
     }
   }),
 
   GameObjectSample_logo = GameOject.extend({
     init : function(){
       this._super(0,0);
+
+      //on init we set the direction to be to the right
       this.velocity = new Vector2D(1,0);
 
     },
     update:function(){
       this._super();
-      if(this.pos.x > CANVAS_WIDTH - this.width)
+
+      // Bouncing logo
+      if(this.pos.x > CANVAS_WIDTH - this.width || this.pos.x < 0)
       {
-        this.velocity = new Vector2D(-1,0);
-      }
-      if(this.pos.x < 0)
-      {
-        this.velocity = new Vector2D(1,0);
+        //we flip the X axis
+        this.velocity = new Vector2D(-this.velocity.x,0);
       }
     },
     draw: function()
     {
+      //draw resources.logo to the screen
       this._super("logo");
     }
   }),
 
   init = function(){
     
+    //set the canvas element width
     c.width = CANVAS_WIDTH;
+
+    //set the canvas element height
     c.height = CANVAS_HEIGHT;
 
-    // We are about to start.
-    // First we must wait that all game resources have been loaded.
+    //make an instance of loadingPanel
     loadingPanel = new LoadingPanel();
-    var sample = new GameObjectSample_logo();
 
+    //add a sample GameObject
+    var sample = new GameObjectSample_logo();
     gameObjects.push(sample);
 
+
+    //game loop
     (function(){
       setTimeout(arguments.callee, 1000/FPS);
 
-      //Clear screen
+      //clear screen
       C.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-      if(!loaded)
-      {
-        loadingPanel.update();
-        loadingPanel.draw();
-      }
-      else
+      //when we have all resources loaded into the game we can start drawing and updating our gameobjects
+      if(loaded)
       {
         for(var gameObject in gameObjects)
         {
+          //update all gameObjects
           if(gameObjects[gameObject])
-            {
-              gameObjects[gameObject].update();
-            }
+          {
+            gameObjects[gameObject].update();
+          }
 
-            if(gameObjects[gameObject])
-            {
-              gameObjects[gameObject].draw();
-            }
+          //draw all gameObjects
+          if(gameObjects[gameObject])
+          {
+            gameObjects[gameObject].draw();
+          }
         }
+      }
+      else
+      {
+        //update the loading panel
+        loadingPanel.update();
+
+        //draw the loading panel while the client is still busy with all resources
+        loadingPanel.draw();
       }
 
     })();
 
   };
 
+  //start the init
   init();
 
 
